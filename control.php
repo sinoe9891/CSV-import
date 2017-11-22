@@ -6,14 +6,22 @@ error_reporting(E_ALL);
 $db_host = 'localhost';
 $db_user = 'root';
 $db_pass = '';
-
 $database = 'usuario_datos_personales';
 $table = 'usuario_datos_personales';
-if (!@mysql_connect($db_host, $db_user, $db_pass))
-    die("No se pudo establecer conexión a la base de datos");
 
-if (!@mysql_select_db($database))
-    die("base de datos no existe");
+$mysqli = new mysqli($db_host,$db_user,$db_pass,$database);
+	 //servidor, usuario de base de datos, contraseña del usuario, nombre de base de datos
+
+	if(mysqli_connect_errno()){
+		echo 'Conexion Fallida : ', mysqli_connect_error();
+		echo "conexion fallo";
+		exit();
+	}
+
+		if (!$mysqli->set_charset("utf8")) {
+    printf("Error loading character set utf8: %s\n", $mysqli->error);
+    exit();
+    }
     if(isset($_POST['submit']))
     {
         //Aquí es donde seleccionamos nuestro csv
@@ -30,9 +38,18 @@ if (!@mysql_select_db($database))
              while (($data = fgetcsv($handle, 1000, ",")) !== FALSE)
              {
                //Insertamos los datos con los valores...
-                $sql = "INSERT into usuario_datos_personales(id, primer_apellido, segundo_apellido, nombre, trabajador, nif) values('$data[0]','$data[1]','$data[2]','$data[3]','$data[4]',...)";
-                mysql_query($sql) or die('Error: '.mysql_error());
+               $sql = "INSERT into usuario_datos_personales(id, primer_apellido, segundo_apellido, nombre, trabajador, nif) values('$data[0]','$data[1]','$data[2]','$data[3]','$data[4]','$data[5]')";
+
+               if ($mysqli->query($sql) === TRUE) {
+               		    echo "Se realizó con éxito";
+               		} else {
+               		    echo "Error updating record: " . $mysqli->error;
+               		}
+
+
+
              }
+             $mysqli->close();
              //cerramos la lectura del archivo "abrir archivo" con un "cerrar archivo"
              fclose($handle);
              echo "Importación exitosa!";
